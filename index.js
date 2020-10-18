@@ -4,18 +4,7 @@ const mongoose = require("mongoose");
 const { MONGODB } = require("./config");
 const Post = require("./modals/Post");
 const User = require("./modals/User");
-const typeDefs = gql`
-  type Post {
-    id: ID!
-    body: String!
-    username: String!
-    createdAt: String!
-  }
-  type Query {
-    getPosts:[Post]
-  }
-`;
-
+const typeDefs=require("./Graphql/TypeDefs")
 const resolvers = {
   Query: {
     async getPosts(){
@@ -36,7 +25,7 @@ const server = new ApolloServer({
 });
 mongoose
   .connect(MONGODB, { useNewUrlParser: true })
-  .then(() => {
+  .then((res) => {
     console.log("mongodb connected");
     return server.listen({ port: 5000 });
   })
