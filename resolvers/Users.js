@@ -3,11 +3,13 @@ const jwt=require("jsonwebtoken");
 const User = require("../modals/User");
 const {SECRET_KEY}=require("../config");
 const { UserInputError } = require("apollo-server");
+const {validateRegisteredInput} =require("../Validations")
 module.exports={
   Mutation:{
    async register(_,{
     registerInput:{username,email,password,confirmPassword}
     },context,info){
+      const {valid,errors}=validateRegisteredInput(username,email,password,confirmPassword)
       const user=await User.findOne({username});
       if(user){
         throw new UserInputError("Username is taken",{
