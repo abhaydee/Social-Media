@@ -4,9 +4,9 @@ const User = require("../modals/User");
 const { SECRET_KEY } = require("../config");
 const { UserInputError } = require("apollo-server");
 const  {validateRegisteredInput, validateLoginInput}  = require("../Validations");
-console.log("the function",validateRegisteredInput)
+console.log("the function",validateLoginInput)
 function generateToken(user){
-  const token = jwt.sign(
+  return jwt.sign(
     {
       id: res.id,
       email: res.email,
@@ -18,9 +18,11 @@ function generateToken(user){
 }
 module.exports = {
   Mutation: {
-    async login(_,username,password
-    ){
+    async login(_,{username,password}){
       const {errors,valid}=validateLoginInput(username,password);
+      if(!valid){
+        throw new UserInputError("errors",{errors})
+      }
       const user=await User.findOne({username})
       if(!user){
         errors.general="User not found"
@@ -31,6 +33,12 @@ module.exports = {
         errors.general="Wrong credentials"
         throw new UserInputError("wrong credentials",{errors})
       }
+      const token=generateToken(user)
+      return {
+        ...user._doc,
+        id: user._id,
+        token,
+      };
     },
     async register(
       _,
@@ -63,7 +71,7 @@ module.exports = {
         createdAt: new Date().toISOString(),
       });
       const res = await newUser.save();
-     
+      const token=generateToken(res)
       return {
         ...res._doc,
         id: res._id,
